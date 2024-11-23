@@ -1,7 +1,7 @@
 import 'package:shopping_app/models/cart_item_model.dart';
 
 class OrderModel {
-  final String id;
+  final String? id;
   final List<CartItem> items;
   final double totalAmount;
   final DateTime dateTime;
@@ -13,7 +13,7 @@ class OrderModel {
     required this.fullName,
     required this.adress,
     required this.phoneNumber,
-    required this.id,
+    this.id,
     required this.items,
     required this.totalAmount,
     required this.dateTime,

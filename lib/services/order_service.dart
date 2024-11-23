@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/widgets.dart';
 import 'package:shopping_app/models/order_model.dart';
 import 'package:shopping_app/models/cart_item_model.dart';
 
@@ -9,7 +10,6 @@ class OrderService {
       String fullName, String adress, String phoneNumber) async {
     try {
       final order = OrderModel(
-        id: DateTime.now().toString(),
         fullName: fullName,
         adress: adress,
         phoneNumber: phoneNumber,
@@ -17,7 +17,13 @@ class OrderService {
         totalAmount: totalAmount,
         dateTime: DateTime.now(),
       );
-      await _firestore.collection('orders').add(order.toMap());
+
+      final docRef = await _firestore.collection('orders').add(order.toMap());
+
+      final generatedId = docRef.id;
+      await docRef.update({'id': generatedId});
+
+      debugPrint('Order placed successfully with ID: $generatedId');
     } catch (e) {
       throw Exception("Error placing order: $e");
     }

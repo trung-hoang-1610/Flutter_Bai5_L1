@@ -10,30 +10,33 @@ class CartService {
 
     final cartSnapshot = await cartRef.get();
 
+    List<CartItem> cartItems = [];
+
     if (cartSnapshot.exists) {
-      List<dynamic> cartList = cartSnapshot.data()!['items'];
-      List<CartItem> cartItems = cartList
-          .map((item) => CartItem.fromMap(item as Map<String, dynamic>))
-          .toList();
-
-      int existingItemIndex =
-          cartItems.indexWhere((item) => item.productId == cartItem.productId);
-
-      if (existingItemIndex >= 0) {
-        cartItems[existingItemIndex].quantity += cartItem.quantity;
-      } else {
-        cartItems.add(cartItem);
+      // Kiểm tra nếu 'items' tồn tại và không null
+      List<dynamic>? cartList = cartSnapshot.data()?['items'];
+      if (cartList != null) {
+        cartItems = cartList
+            .map((item) => CartItem.fromMap(item as Map<String, dynamic>))
+            .toList();
       }
-
-      List<Map<String, dynamic>> updatedCartList =
-          cartItems.map((item) => item.toMap()).toList();
-
-      await cartRef.update({'items': updatedCartList});
-    } else {
-      await cartRef.set({
-        'items': [cartItem.toMap()],
-      });
     }
+
+    // Xử lý cập nhật số lượng hoặc thêm mới
+    int existingItemIndex =
+        cartItems.indexWhere((item) => item.productId == cartItem.productId);
+
+    if (existingItemIndex >= 0) {
+      cartItems[existingItemIndex].quantity += cartItem.quantity;
+    } else {
+      cartItems.add(cartItem);
+    }
+
+    // Cập nhật dữ liệu trong Firestore
+    List<Map<String, dynamic>> updatedCartList =
+        cartItems.map((item) => item.toMap()).toList();
+
+    await cartRef.set({'items': updatedCartList});
   }
 
   Future<List<CartItem>> getCartItems(String userId) async {
